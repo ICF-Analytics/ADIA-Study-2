@@ -20,7 +20,7 @@ library(gt)
 setwd('C:/Users/21983/OneDrive - ICF/ADIA/study 2') 
 #getwd()
 
-dat <- read.csv('data/LS_all_1.csv')
+dat <- read.csv('data/LS_all_c1.csv')
 head(dat)
 colnames(dat)
 summary(dat)
@@ -40,7 +40,7 @@ dat <- dat[dat$anyACE==1,] #n=971
 
 ### 3.- In that population, we want to campare those who develop a certain outcome to those who do not
 # ()'case-control' design)
-outv <- "RB_preg"
+outv <- "RB_preg16"
 dat$y <- dat$RB_preg #exposed and no missing on outcome 0=408 1=165 na=398
 table(dat$y, useNA = "ifany")
 table(dat$RB_preg, useNA = "ifany")

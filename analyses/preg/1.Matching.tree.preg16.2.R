@@ -20,7 +20,7 @@ library(gt)
 setwd('C:/Users/21983/OneDrive - ICF/ADIA/study 2') 
 #getwd()
 
-dat <- read.csv('data/LS_all_1.csv')
+dat <- read.csv('data/LS_all_c2.csv')
 head(dat)
 colnames(dat)
 summary(dat)
@@ -40,7 +40,7 @@ dat <- dat[dat$anyACE==1,] #n=971
 
 ### 3.- In that population, we want to campare those who develop a certain outcome to those who do not
 # ()'case-control' design)
-outv <- "RB_preg"
+outv <- "RB_preg16"
 dat$y <- dat$RB_preg #exposed and no missing on outcome 0=408 1=165 na=398
 table(dat$y, useNA = "ifany")
 table(dat$RB_preg, useNA = "ifany")
@@ -132,16 +132,16 @@ print(baltab, un = FALSE, disp.v.threshold = FALSE)
 
 lplot <- love.plot(out,treat=t_ind,covs=X,thresholds = c(m = .1), binary = "std",s.d.denom='treated')
 lplot
-png(paste0("output/",outv,".love.plot.png"), width = 480*4,heigh=480*4,res=300)
-lplot
-dev.off()
+#png(paste0("output/",outv,".love.plot.png"), width = 480*4,heigh=480*4,res=300)
+#lplot
+#dev.off()
 
 
 table(out$group_id,useNA='ifany')
 sdat <- dat[c(out$t_id,out$c_id	),]
 dim(sdat)
 sdat$id <- out$group_id
-saveRDS(sdat, file=paste0('data/', outv, '.m.Rds'))
+saveRDS(sdat, file=paste0('data/', outv, '.2.m.Rds'))
 #C:/Users/21983/OneDrive - ICF/ADIA/study 2
 #write.csv(sdat,file=file.path(pathi,'anySUD_matched.csv'),na='')
 #Ye: you may watn to save files and plots

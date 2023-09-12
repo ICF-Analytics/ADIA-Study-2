@@ -20,7 +20,7 @@ library(gt)
 setwd('C:/Users/21983/OneDrive - ICF/ADIA/study 2') 
 #getwd()
 
-dat <- read.csv('data/LS_all_1.csv')
+dat <- read.csv('data/LS_all_c1.csv')
 head(dat)
 colnames(dat)
 summary(dat)
@@ -40,14 +40,14 @@ dat <- dat[dat$anyACE==1,] #n=971
 
 ### 3.- In that population, we want to campare those who develop a certain outcome to those who do not
 # ()'case-control' design)
-outv <- "RB_preg"
-dat$y <- dat$RB_preg #exposed and no missing on outcome 0=408 1=165 na=398
+outv <- "RB_preg_female16"
+dat$y <- dat$RB_preg_female #exposed and no missing on outcome 0=408 1=165 na=398
 table(dat$y, useNA = "ifany")
 table(dat$RB_preg, useNA = "ifany")
 table(dat$RB_preg_o, useNA = "ifany")
 table(dat$RB_preg_female, useNA = "ifany")
 
-dat <- dat[!is.na(dat$y), ] #n=483-including female and male reporting pregancy
+dat <- dat[!is.na(dat$y), ] #n=372-including female reporting pregnancy only
 
 
 table(dat$childsex_bsl)
@@ -56,9 +56,9 @@ table(dat$RB_preg[dat$childsex_bsl==1])
 
 
 
-### 4.- 'holding constant' some characteristics
+### 4.- 'holding constant' some characteristics-exclude sex
 
-x.n <- c('center', 'childrace_bsl','cohort','childsex_bsl','caregiver_married16','hh_income16')
+x.n <- c('center', 'childrace_bsl','cohort','caregiver_married16','hh_income16')
 #4.0 treat missing as a separate category
 #(so we do not lose cases becosue of missing covariates here)
 dat[,x.n] <- lapply(dat[,x.n] ,addNA,ifany =T) #
@@ -80,7 +80,7 @@ t_ind = dat$y
 # to shose individual matches
 
 #x <- c('center', 'childrace_bsl','cohort','childsex_bsl','caregiver_married16','hh_income16')
-x <- c('center', 'childrace_bsl','childsex_bsl','caregiver_married16','hh_income16')#take out cohort from pair-matching, still in mom bal
+x <- c('center', 'childrace_bsl','caregiver_married16','hh_income16')#take out cohort from pair-matching, still in mom bal
 X         <- model.matrix(~ .,data=dat[,x])[,-1]
 dist_mat = distmat(t_ind, X)
 
@@ -88,7 +88,7 @@ dist_mat = distmat(t_ind, X)
 # constrain differences in means to be at most .05 standard deviations apart
 # this influence the marginal distribution not the individual matches
 
-z <- c('center', 'childrace_bsl','cohort','childsex_bsl','caregiver_married16','hh_income16')
+z <- c('center', 'childrace_bsl','cohort','caregiver_married16','hh_income16')
 Z         <- model.matrix(~ .,data=dat[,z])[,-1]
 mom_tols = round(absstddif(Z, t_ind, .05), 2)#if there is a rare factors (e.g., NA), either take it out from X, or change .05 to larger number .1, .15
 mom = list(covs = Z, tols = mom_tols)
