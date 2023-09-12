@@ -8,7 +8,7 @@ library(survival)
 # Ye: un-comment this next line to change path to your own
 setwd('C:/Users/21983/OneDrive - ICF/ADIA/study 2') 
 
-outv <- "RB_su"
+outv <- "RB_su16"
 
 #===============================================================================
 ###II. Exploring possible protective factors
@@ -26,16 +26,29 @@ table(sdat$ts, useNA = "ifany")
 dim(sdat)
 summary(sdat)
 #ALL PCE indicators
-zn <- c("anysupadu_1",  	"anysupparent_1",  	"anysuprelative_1"
-        , "anysupnonfam_1",  	"fam_sat_1",  	"home_safety_1"
-        , "prrelation_1",  	"neighborhood_exp_1",  	"school_safety_t_1"
-        , "srvc_use_1", "childcare_1", "neighborhood_safety_2"
-        , "neighborhood_exp_2", "school_safety_y_2", "school_safety_t_2"
-        , "srvc_use_2", "anysupadu_3", "anysupparent_3"
-        , "anysuprelative_3", "anysupnonfam_3", "prrelation_3"
-        , "bestfriend_3", "socialpart_3", "parent_involv_3"
-        , "resid_stab_3", "neighborhood_safety_3", "neighborhood_exp_3"
-        , "srvc_use_3")
+#zn <- c("anysupadu_1",  	"anysupparent_1",  	"anysuprelative_1"
+#        , "anysupnonfam_1",  	"fam_sat_1",  	"home_safety_1"
+#        , "prrelation_1",  	"neighborhood_exp_1",  	"school_safety_t_1"
+#        , "srvc_use_1", "childcare_1", "neighborhood_safety_2"
+#        , "neighborhood_exp_2", "school_safety_y_2", "school_safety_t_2"
+#        , "srvc_use_2", "anysupadu_3", "anysupparent_3"
+#        , "anysuprelative_3", "anysupnonfam_3", "prrelation_3"
+#        , "bestfriend_3", "socialpart_3", "parent_involv_3"
+#        , "resid_stab_3", "neighborhood_safety_3", "neighborhood_exp_3"
+#        , "srvc_use_3")
+
+zn <- c("anysupadu_1", 	"anysupadu_s_1", 	"anysupparent_1", 	"anysupparent_s_1", 	"anysuprelative_1"
+        ,"anysuprelative_s_1", 	"anysupnonfam_1", 	"anysupnonfam_s_1", 	"fam_sat_1", 	"fam_sat_s_1"
+        ,"home_safety_1", 	"home_safety_s_1", 	"prrelation_1", 	"prrelation_s_1", 	"neighborhood_exp_1"
+        ,"neighborhood_exp_s_1", 	"school_safety_t_1", 	"school_safety_t_s_1", 	"srvc_use_1", 	"srvc_use_s_1"
+        ,"childcare_1", 	"neighborhood_safety_2", 	"neighborhood_safety_s_2", 	"neighborhood_exp_2"
+        ,"neighborhood_exp_s_2", 	"school_safety_y_2", 	"school_safety_y_s_2", 	"school_safety_t_2"
+        ,"school_safety_t_s_2", 	"srvc_use_2", 	"srvc_use_s_2", 	"anysupadu_3", 	"anysupadu_s_3"
+        ,"anysupparent_3", 	"anysuprelative_3", 	"anysupnonfam_3", 	"prrelation_3", 	"prrelation_s_3"
+        ,"bestfriend_3", 	"socialpart_3", 	"socialpart_s_3", 	"parent_involv_3", 	"parent_involv_s_3"
+        ,"resid_stab_3", 	"neighborhood_safety_3", 	"neighborhood_safety_s_3", 	"neighborhood_exp_3"
+        ,"neighborhood_exp_s_3", 	"srvc_use_3", 	"srvc_use_s_3")
+
 
 summary(sdat[, zn])
 
@@ -106,7 +119,7 @@ dim(sdat)
 
 #condtional logitic for penalized cl
 cfit2 <- clogit(y ~
-                  + resid_stab_3
+                  school_safety_t_s_1
                 + strata(id)
                 , data = df1)
 

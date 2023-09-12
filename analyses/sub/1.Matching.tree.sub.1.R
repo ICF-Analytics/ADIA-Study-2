@@ -140,7 +140,7 @@ saveRDS(sdat, file=paste0('data/', outv, '.m.Rds'))
 #===============================================================================
 ###II. Exploring possible protective factors
 #===============================================================================
-sdat <- readRDS(sdat, file=paste0('data/', outv, '.m.Rds'))
+sdat <- readRDS(file=paste0('data/', outv, '.m.Rds'))
 
 #1. define a training sample
 length(unique(sdat$id))
@@ -154,11 +154,11 @@ dim(sdat)
 summary(sdat)
 #ALL PCE indicators
 z.n  <- c('anysupadu_1',  	'anysupparent_1',  	'anysuprelative_1',  	'anysupnonfam_1',  	'fam_sat_1',  	'home_safety_1',  	
-  'prrelation_1',  	'neighborhood_exp_1',  	'school_safety_t_1',  	'srvc_use_1',  	'childcare_1',  	
-  'neighborhood_safety_2',  	'neighborhood_exp_2',  	'school_safety_y_2',  	'school_safety_t_2',  	
-  'srvc_use_2',  	'anysupadu_3',  	'anysupparent_3',  	'anysuprelative_3',  	'anysupnonfam_3',  	'prrelation_3',  	
-  'bestfriend_3',  	'socialpart_3',  	'parent_involv_3',  	'resid_stab_3',  	'neighborhood_safety_3',  	'neighborhood_exp_3',  	
-  'srvc_use_3')  
+          'prrelation_1',  	'neighborhood_exp_1',  	'school_safety_t_1',  	'srvc_use_1',  	'childcare_1',  	
+          'neighborhood_safety_2',  	'neighborhood_exp_2',  	'school_safety_y_2',  	'school_safety_t_2',  	
+          'srvc_use_2',  	'anysupadu_3',  	'anysupparent_3',  	'anysuprelative_3',  	'anysupnonfam_3',  	'prrelation_3',  	
+          'bestfriend_3',  	'socialpart_3',  	'parent_involv_3',  	'resid_stab_3',  	'neighborhood_safety_3',  	'neighborhood_exp_3',  	
+          'srvc_use_3')  
 
 #PCE across time indicators
 #z.n  <- c('anysupadu', 'anysupparent', 'anysuprelative', 'anysupnonfam', 'fam_sat', 'home_safety', 'prrelation',
@@ -217,10 +217,10 @@ set.seed(0203)
 #library(rpart)
 
 tree <- with(df0, rpart(as.factor(y) ~ . ,
-                                    data = data.frame(y, Z), cp = -1, xval = 10,
-                                    method = "class"
-                                    #,control=list(minbucket = 20)
-                        )) #adjust to avoid produce too many groups
+                        data = data.frame(y, Z), cp = -1, xval = 10,
+                        method = "class"
+                        #,control=list(minbucket = 20)
+)) #adjust to avoid produce too many groups
 plotcp(tree, col = "red")
 tree$cptable
 #> tree$cptable

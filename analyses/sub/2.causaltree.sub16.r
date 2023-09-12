@@ -7,6 +7,9 @@ library(gt)
 library(cobalt)
 library(causalTree)
 library(survey)
+library(rpart)
+library(partykit)
+library(rpart.plot)
 
 setwd("C:/Users/21983/OneDrive - ICF/ADIA/study 2/")
 
