@@ -105,7 +105,7 @@ dim(sdat)
 
 #condtional logitic for penalized cl
 cfit2 <- clogit(y ~
-                  + school_safety_t_1 + neighborhood_exp_2
+                  school_safety_t_1 + neighborhood_exp_2
                 + strata(id)
                 , data = df1)
 
