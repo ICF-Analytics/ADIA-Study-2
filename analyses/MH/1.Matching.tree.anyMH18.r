@@ -19,7 +19,8 @@ library(gt)
 # Ye: un-comment this next line to change path to your own
 setwd('C:/Users/21983/OneDrive - ICF/ADIA/study 2') 
 
-dat <- read.csv('data/LS_all_c2.csv')
+#dat <- read.csv('data/LS_all_c2.csv')
+dat <- read.csv('data/LS_all.csv')
 head(dat)
 colnames(dat)
 summary(dat)
