@@ -120,16 +120,19 @@ print(baltab, un = FALSE, disp.v.threshold = FALSE)
 
 lplot <- love.plot(out,treat=t_ind,covs=X,thresholds = c(m = .1), binary = "std",s.d.denom='treated')
 lplot
-png(paste0("output/",outv,".love.plot.png"), width = 480*4,heigh=480*4,res=300)
-lplot
-dev.off()
-
 
 table(out$group_id,useNA='ifany')
 sdat <- dat[c(out$t_id,out$c_id	),]
 dim(sdat)
 sdat$id <- out$group_id
 saveRDS(sdat, file=paste0('data/', outv, '.m.Rds'))
+
+png(paste0("output/",outv,".love.plot.png"), width = 480*4,heigh=480*4,res=300)
+lplot
+dev.off()
+
+
+
 #C:/Users/21983/OneDrive - ICF/ADIA/study 2
 #write.csv(sdat,file=file.path(pathi,'anySUD_matched.csv'),na='')
 #Ye: you may watn to save files and plots
@@ -151,11 +154,11 @@ dim(sdat)
 summary(sdat)
 #ALL PCE indicators
 z.n  <- c('anysupadu_1',  	'anysupparent_1',  	'anysuprelative_1',  	'anysupnonfam_1',  	'fam_sat_1',  	'home_safety_1',  	
-  'prrelation_1',  	'neighborhood_exp_1',  	'school_safety_t_1',  	'srvc_use_1',  	'childcare_1',  	
-  'neighborhood_safety_2',  	'neighborhood_exp_2',  	'school_safety_y_2',  	'school_safety_t_2',  	
-  'srvc_use_2',  	'anysupadu_3',  	'anysupparent_3',  	'anysuprelative_3',  	'anysupnonfam_3',  	'prrelation_3',  	
-  'bestfriend_3',  	'socialpart_3',  	'parent_involv_3',  	'resid_stab_3',  	'neighborhood_safety_3',  	'neighborhood_exp_3',  	
-  'srvc_use_3')  
+          'prrelation_1',  	'neighborhood_exp_1',  	'school_safety_t_1',  	'srvc_use_1',  	'childcare_1',  	
+          'neighborhood_safety_2',  	'neighborhood_exp_2',  	'school_safety_y_2',  	'school_safety_t_2',  	
+          'srvc_use_2',  	'anysupadu_3',  	'anysupparent_3',  	'anysuprelative_3',  	'anysupnonfam_3',  	'prrelation_3',  	
+          'bestfriend_3',  	'socialpart_3',  	'parent_involv_3',  	'resid_stab_3',  	'neighborhood_safety_3',  	'neighborhood_exp_3',  	
+          'srvc_use_3')  
 
 #PCE across time indicators
 #z.n  <- c('anysupadu', 'anysupparent', 'anysuprelative', 'anysupnonfam', 'fam_sat', 'home_safety', 'prrelation',
@@ -213,17 +216,17 @@ set.seed(0203)
 #3.1. - evolutionary tree (just for comparisson)
 
 efit <- with(df0, evtree(factor(y) ~.,
-                                             data = na.omit(data.frame(y, Z))))
+                         data = na.omit(data.frame(y, Z))))
 plot(efit)
 
 
 ###3.2.- calssical tress (does not requiere listwise deletion)
 #a.- grow large tree
 tree <- with(df0, rpart(factor(y) ~ . ,
-                                    data = data.frame(y, Z), cp = -1, xval = 10,
-                                    method = "class"
-                                   # ,control=list(minbucket = 10)
-                        )) #adjust to avoid produce too many groups
+                        data = data.frame(y, Z), cp = -1, xval = 10,
+                        method = "class"
+                        # ,control=list(minbucket = 10)
+)) #adjust to avoid produce too many groups
 
 plotcp(tree, col = "red")
 tree$cptable
