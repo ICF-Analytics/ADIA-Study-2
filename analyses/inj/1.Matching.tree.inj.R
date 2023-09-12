@@ -22,6 +22,7 @@ outv <- "inj_victim"
 
 #===============================================================================
 
+#dat <- read.csv('data/LS_all_c2.csv')
 dat <- read.csv('data/LS_all.csv')
 head(dat)
 colnames(dat)
@@ -124,9 +125,9 @@ print(baltab, un = FALSE, disp.v.threshold = FALSE)
 
 lplot <- love.plot(out,treat=t_ind,covs=X,thresholds = c(m = .1), binary = "std",s.d.denom='treated')
 lplot
-png(paste0("output/",outv,".love.plot.png"), width = 480*4,heigh=480*4,res=300)
-lplot
-dev.off()
+#png(paste0("output/",outv,".love.plot.png"), width = 480*4,heigh=480*4,res=300)
+#lplot
+#dev.off()
 
 
 table(out$group_id,useNA='ifany')
@@ -134,177 +135,8 @@ sdat <- dat[c(out$t_id,out$c_id	),]
 dim(sdat)
 sdat$id <- out$group_id
 saveRDS(sdat, file=paste0('data/', outv, '.m.Rds'))
+#saveRDS(sdat, file=paste0('data/', outv, '.2.m.Rds'))
 #C:/Users/21983/OneDrive - ICF/ADIA/study 2
 #write.csv(sdat,file=file.path(pathi,'anySUD_matched.csv'),na='')
 #Ye: you may watn to save files and plots
 
-#===============================================================================
-###II. Exploring possible protective factors
-#===============================================================================
-sdat <- readRDS(sdat, file=paste0('data/', outv, '.m.Rds'))
-
-#1. define a training sample
-length(unique(sdat$id))
-set.seed(0203)
-ts <- sample(unique(sdat$id), length(unique(sdat$id)) / 2)
-sdat$ts <- as.numeric(sdat$id %in% ts)
-table(sdat$ts, useNA='ifany')
-
-#2.- Protective factors
-dim(sdat)
-summary(sdat)
-#ALL PCE indicators
-z.n  <- c('anysupadu_1',  	'anysupparent_1',  	'anysuprelative_1',  	'anysupnonfam_1',  	'fam_sat_1',  	'home_safety_1',  	
-  'prrelation_1',  	'neighborhood_exp_1',  	'school_safety_t_1',  	'srvc_use_1',  	'childcare_1',  	
-  'neighborhood_safety_2',  	'neighborhood_exp_2',  	'school_safety_y_2',  	'school_safety_t_2',  	
-  'srvc_use_2',  	'anysupadu_3',  	'anysupparent_3',  	'anysuprelative_3',  	'anysupnonfam_3',  	'prrelation_3',  	
-  'bestfriend_3',  	'socialpart_3',  	'parent_involv_3',  	'resid_stab_3',  	'neighborhood_safety_3',  	'neighborhood_exp_3',  	
-  'srvc_use_3')  
-
-#PCE across time indicators
-#z.n  <- c('anysupadu', 'anysupparent', 'anysuprelative', 'anysupnonfam', 'fam_sat', 'home_safety', 'prrelation',
-#          'bestfriend', 'socialpart', 'parent_involv', 'resid_stab', 'neighborhood_safety', 'neighborhood_exp',
-#          'school_safety_y', 'srvc_use', 'childcare')
-
-summary(sdat[, z.n])
-
-
-###2.2- centering
-# we need to center covariates at the pair-mean
-# Stanfill et al. (2019) https://doi.org/10.1177/1179597219858954
-
-#'old school' way
-#sdat   <-  sdat[order(sdat$id),]
-#sdat$Z <-  model.matrix(~ ., model.frame(~ ., sdat[,z.n], na.action=na.pass))[,-1]
-#sdat$Z <-  do.call(rbind,lapply(split(data.frame(Z),sdat$id), function(d) apply(d,2,scale,scale=F) ))
-
-sdat$Z <-
-  sdat[, z.n] %>%
-  with(., model.matrix(~ .,
-                       model.frame(~ ., data=., na.action = na.pass))[,-1]) %>%
-  data.frame() %>%
-  group_by(sdat$id) %>%
-  mutate(across(everything(), scale, scale = FALSE)) %>%
-  ungroup %>%
-  .[, -dim(.)[2]]
-
-#-------------------------------------------------------------------------------
-###Ye: this is a small simulation test
-# It generates a predictor X
-# and check that the procedure captures the predictor
-#sdat$x <- ifelse(runif(length(sdat$y ))>0.25,!sdat$y,sdat$y)
-#table(sdat$x,sdat$y)
-
-#sdat$Z <-
-#  sdat[,c(z.n,'x')] %>%
-#  with(., model.matrix(~ ., model.frame(~ ., data=.,na.action=na.pass))[,-1]) %>%
-#  data.frame ()%>%
-#  group_by(sdat$id) %>%
-#  mutate(across(everything(),scale,scale=F)) %>%
-#  ungroup %>%
-#  .[,-dim(.)[2]]
-#-------------------------------------------------------------------------------
-
-###3. - Run tree algorithm on training data
-df0 <-
-  sdat %>%
-  filter(ts == 1)
-dim(df0)
-dim(sdat)
-set.seed(0203)
-
-
-###3.1.- calssical tress (does not requiere listwise deletion)
-#a.- grow large tree
-#library(rpart)
-
-tree <- with(df0, rpart(as.factor(y) ~ . ,
-                                    data = data.frame(y, Z), cp = 0, xval = 5,
-                                    method = "class"
-                                   # ,control=list(minbucket = 20)
-                        )) #adjust to avoid produce too many groups
-plotcp(tree, col = "red")
-tree$cptable
-
-tree$cptable
-#> tree$cptable
-#CP nsplit rel error xerror  xstd
-#1 0.4667      0     1.000  1.267 0.124
-#2 0.0222      1     0.533  0.833 0.127
-#3 0.0000      4     0.467  0.833 0.127
-
-#A good choice of cp for pruning is often 
-#the leftmost value for which the mean lies below the horizontal line.
-
-#b.- prune based on complexity
-
-opcp <- tree$cptable[, "CP"][which.min(tree$cptable[, "xerror"])]
-
-ptree <- prune(tree, cp = opcp)
-
-rpart.plot(ptree, roundint = FALSE)
-plot(as.party(ptree))
-prp(ptree, type = 4, # left and right split labels (see Figure 2)
-    clip.right.labs = FALSE, # full right split labels
-    extra = 101, # show nbr of obs and percentages (see Figure 3)
-    under = TRUE, # position extra info _under_ the boxes
-    under.cex = 1, # size of text under the boxes (default is .8)
-    fallen.leaves = TRUE, # put leaves at the bottom of plot
-    box.palette = "GnYlRd", # color of the boxes
-    branch = .3, # branch lines with narrow shoulders and down slopes
-    round = 0, # no rounding of node corners i.e. use rectangles
-    leaf.round = 9, # round leaf nodes (for leaves, this supersedes the round arg)
-    #prefix = "Depression Score\n", # prepend this string to the node labels
-    main = "Injury classical tree", # main title
-    cex.main = 1.0, # use big text for main title
-    branch.col = "gray", # color of branch lines
-    branch.lwd = 2, # line width of branch lines
-    roundint=FALSE)
-
-png(paste0("output/", outv, ".tree.plot.classical.png")
-    , width = 480 * 4, heigh = 480 * 4, res = 300)
-plot(as.party(ptree))
-rpart.plot(ptree, roundint = FALSE)
-prp(ptree, type = 4, # left and right split labels (see Figure 2)
-    clip.right.labs = FALSE, # full right split labels
-    extra = 101, # show nbr of obs and percentages (see Figure 3)
-    under = TRUE, # position extra info _under_ the boxes
-    under.cex = 1, # size of text under the boxes (default is .8)
-    fallen.leaves = TRUE, # put leaves at the bottom of plot
-    box.palette = "GnYlRd", # color of the boxes
-    branch = .3, # branch lines with narrow shoulders and down slopes
-    round = 0, # no rounding of node corners i.e. use rectangles
-    leaf.round = 9, # round leaf nodes (for leaves, this supersedes the round arg)
-    #prefix = "Depression Score\n", # prepend this string to the node labels
-    main = "Injury classical tree", # main title
-    cex.main = 1.0, # use big text for main title
-    branch.col = "gray", # color of branch lines
-    branch.lwd = 2, # line width of branch lines
-    roundint=FALSE)
-dev.off()
-
-
-sdat$node.rtree <- factor(predict(as.party(ptree),
-                                  type = "node", newdata = sdat$Z))
-table(sdat$node.rtree)
-
-#===============================================================================
-###.-inference (95% CI; p-values)
-#===============================================================================
-df1 <-
-  sdat %>%
-  filter(ts == 0)
-dim(df1)
-dim(sdat)
-
-#library(survival)
-cfite <- clogit(y ~ node.rtree  + strata(id), data = df1)
-anova(cfite, update(cfite, . ~ 1 +  strata(id)))
-summary(cfite)
-
-
-#mean by group in training and validation data
-t(with(sdat[sdat$ts==0,], tapply(y, node.rtree, mean)))
-t(with(sdat[sdat$ts==1,], tapply(y, node.rtree, mean)))
-table(sdat$node.rtree)
-table(df1$node.rtree)
