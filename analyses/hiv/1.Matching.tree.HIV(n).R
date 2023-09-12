@@ -42,7 +42,7 @@ dat <- dat[dat$anyACE==1,] #n=971
 
 dat$y <- dat$RB_HIV #exposed and no missing on outcome 0=620 1=27 na=324
 table(dat$y, useNA = "ifany")
-dat <- dat[!is.na(dat$y), ] #n=647
+dat <- dat[!is.na(dat$y), ] #0=620 1=27 na=324
 
 
 ### 4.- 'holding constant' some characteristics
